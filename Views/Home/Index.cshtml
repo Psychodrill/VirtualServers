@@ -1,0 +1,113 @@
+@using VirtualServers
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@model IEnumerable<VirtualServer>
+@{
+    //ViewData["Title"] = "Home Page";
+    Layout = null;
+    var period = DateTime.Now - Model.Where(x=>x.RemoveDateTime==null).Min(x=>x.CreateDateTime);
+}
+<!DOCTYPE html>
+
+<html>
+
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Responses</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+</head>
+@using (Html.BeginForm("Index", "Home"))
+{
+    <body>
+
+        <div class="text-center" p-2>
+            <h2>Here is the list of virtual servers</h2>
+            <table id="vsTable" class="table table-bordered table-striped table-sm">
+                <thead>
+                    <tr><th>Current DateTime</th><th>@DateTime.Now</th></tr>
+                    <tr><th>Total usage time</th><th>@period</th></tr>
+                    <tr><th>Virtual server Id</th><th>Create DateTime</th><th>Remove DateTime</th><th>Selected For Remove</th></tr>
+                </thead>
+
+                <tbody>
+                    @foreach (VirtualServer vs in Model)
+                    {
+                        <tr id="VirtualServer">
+                            <td id="vsId">@vs.VirtualServerId</td>
+                            <td id="vsCdt">@vs.CreateDateTime</td>
+                            <td id="vsRdt">@vs.RemoveDateTime</td>
+                            <td id="vsSfr">
+                                <div>
+                                    @Html.CheckBox("VirtualServerId", false, new { value = vs.VirtualServerId, @checked = true })
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="button" value="Add" class="button3" onclick="Add()" />
+                        </td>
+                        <td>
+                            <input type="button" value="Remove" class="button3" onclick="Remove()" />
+                        </td>
+
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    </body>
+
+}
+
+
+</html>
+
+
+<script language="javascript" type="text/javascript">
+    function Remove() {
+
+        var items = [];
+
+        var $dataTable = $('vsTable');
+
+        var $servers = $dataTable.find('VirtualServers');
+
+        $servers.each(function () {
+            var $server = $(this);
+            var saveItem = {};
+            saveItem.VirtualServerId = $server.attr('vsId');
+            saveItem.CreateDateTime = $server.attr('vsCdt');
+            saveItem.RemoveDateTime = $server.attr('vsRdt');
+            saveItem.SelectedForRemove = $editor.attr('vsSfr');
+            items.push(saveItem);
+        });
+
+        doPostAjax('Url.Generate<HomeController>(c => c.Remove(items))', JSON.stringify(items), function () {
+            goToView();
+        });
+
+    }
+    function Add() {
+
+
+        doPostAjax('Url.Generate<HomeController>(c => c.Add())', function () {
+            goToView();
+        });
+
+    }
+    function goToView() {
+        window.location = 'Url.Generate<HomeController>(x => x.Index())';
+    }
+
+</script>
