@@ -12,5 +12,10 @@ namespace VirtualServers.Models
         public DateTime? RemoveDateTime { get; set; }
 
         public bool SelectedForRemove { get; set; }
+
+        public void Refresh()
+        {
+            this.RemoveDateTime = DateTime.Now;
+        }
     }
 }

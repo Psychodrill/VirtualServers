@@ -40,9 +40,9 @@
                             <td id="vsCdt">@vs.CreateDateTime</td>
                             <td id="vsRdt">@vs.RemoveDateTime</td>
                             <td id="vsSfr">
-                                <div>
-                                    @Html.CheckBox("VirtualServerId", false, new { value = vs.VirtualServerId, @checked = true })
-                                </div>
+
+                                @Html.CheckBox("SelectedForRemove", false, new { value = vs.SelectedForRemove, @checked = true })
+
                             </td>
                         </tr>
                     }
@@ -52,10 +52,10 @@
                 <tbody>
                     <tr>
                         <td>
-                            <input type="button" value="Add" class="button3" onclick="Add()" />
+                            <input type="button" value="Add" class="button3" onclick="Add();" />
                         </td>
                         <td>
-                            <input type="button" value="Remove" class="button3" onclick="Remove()" />
+                            <input type="button" value="Remove" class="button3" onclick="Remove();" />
                         </td>
 
                     </tr>
@@ -79,35 +79,73 @@
 
         var items = [];
 
-        var $dataTable = $('vsTable');
+        var dataTable = document.getElementById('vsTable');
+        console.log(dataTable);
 
-        var $servers = $dataTable.find('VirtualServers');
+        var table = document.querySelector('tbody');
 
-        $servers.each(function () {
-            var $server = $(this);
-            var saveItem = {};
-            saveItem.VirtualServerId = $server.attr('vsId');
-            saveItem.CreateDateTime = $server.attr('vsCdt');
-            saveItem.RemoveDateTime = $server.attr('vsRdt');
-            saveItem.SelectedForRemove = $editor.attr('vsSfr');
-            items.push(saveItem);
+        var checkBoxes = table.getElementsByTagName("input");
+
+        console.log(checkBoxes);
+
+        for (var i = 0; i < checkBoxes.length; i++) {
+            if (checkBoxes[i].checked) {
+                var row = checkBoxes[i].parentNode.parentNode;
+                var item = {};
+                item.VirtualServerId = row.cells[0].innerText;
+                item.CreateDateTime = row.cells[1].innerText;
+                item.RemoveDateTime = row.cells[2].innerText;
+
+                items.push(item);
+            }
+        }
+
+        console.log(items);
+
+        stringItems = JSON.stringify(items);
+
+        console.log(stringItems);
+        $.ajax({
+            async:true,
+            //contentType: 'application/json; charset=utf-8',
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            dataType: 'json',
+            type: 'POST',
+            url: 'http://localhost:9716/Home/Remove',
+            data: { servers: stringItems }
+
         });
 
-        doPostAjax('Url.Generate<HomeController>(c => c.Remove(items))', JSON.stringify(items), function () {
-            goToView();
-        });
 
+        goToView();
     }
+
     function Add() {
 
 
-        doPostAjax('Url.Generate<HomeController>(c => c.Add())', function () {
-            goToView();
+
+        $.ajax({
+            async: true,
+            //contentType: 'application/json; charset=utf-8',
+            //contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            //dataType: 'json',
+            type: 'GET',
+            url: 'http://localhost:9716/Home/Add',
+            data: ''
+
         });
+
+            goToView();
+
 
     }
     function goToView() {
-        window.location = 'Url.Generate<HomeController>(x => x.Index())';
+        window.location.reload(true);
     }
 
+
 </script>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+
